@@ -10,12 +10,10 @@ class Request {
     this.body = options.body || {}
     this.headers = options.headers || {}
 
-    // 必须设置Content-Type
     if(!this.headers['Content-Type']) {
       this.headers['Content-Type'] = 'application/x-www-form-urlencoded'
     }
 
-    // 处理不同类型的Content-Type
     if(this.headers['Content-Type'] === 'application/json') {
       this.bodyText = JSON.stringify(this.body)
     } else if (this.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
@@ -27,21 +25,20 @@ class Request {
 
   send(connection) {
     return new Promise((resolve, reject) => {
-      const parser = new ResponseParser // parser通过逐步接收response信息，来构造response对象
+      const parser = new ResponseParser 
       if (connection) {
         connection.write(this.toString())
       } else {
-        // 建立TCP连接
+
         connection = net.createConnection({
           host: this.host,
           port: this.port
         }, () => {
-          // 创建成功回调
+
           connection.write(this.toString())
         })
       }
 
-      // 监听接收数据
       connection.on('data', (data) => {
         parser.receive(data.toString())
         if (parser.isFinished) {

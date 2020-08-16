@@ -52,7 +52,7 @@ function emit(token) {
   }
 }
 
-const EOF = Symbol('EOF') // End Of File
+const EOF = Symbol('EOF')
 
 function data(c) {
   if (c == '<') {
@@ -63,7 +63,6 @@ function data(c) {
       });
       return;
   } else {
-    // 文本节点
       emit({ 
         type: 'text',
         content: c 
@@ -72,12 +71,11 @@ function data(c) {
   }
 }
 
-// 标签开始状态
+
 function tagOpen(c) {
   if(c == '/') {
     return endTagOpen;
   } else if (c.match(/^[a-zA-Z]$/)) {
-    // 如果 < 后紧跟着字母，则要么是开始标签，要么是自封闭标签
       currentToken = {
         type: 'startTag',
         tagName: ''
@@ -88,7 +86,6 @@ function tagOpen(c) {
   }
 }
 
-// 结束标签开始状态
 function endTagOpen(c) {
   if (c.match(/^[a-zA-Z]$/)) {
     currentToken = {
@@ -97,15 +94,14 @@ function endTagOpen(c) {
     }
     return tagName(c);
   } else if (c == '>') {
-    // 出错
+
   } else if (c == EOF) {
-    // 出错
+
   } else {
 
   }
 }
 
-// 标签名状态
 function tagName(c) {
   if (c.match(/^[\t\n\f ]$/)) {
     return beforeAttributeName;
@@ -122,14 +118,12 @@ function tagName(c) {
   }
 }
 
-// 属性名开始前
 function beforeAttributeName(c) {
   if (c.match(/^[\t\n\f ]$/)) {
     return beforeAttributeName;
   } else if ( c == '/' || c == '>') {
     return afterAttributeName(c);
   } else if (c == '=') {
-    // error
   } else {
     currentAttribute = {
       name: '',
@@ -232,8 +226,6 @@ function afterQuotedAttributeValue(c) {
 
   } else {
     console.log('error')
-    // currentAttribute.value += c
-    // return doubleQuotedAttributeValue
   }
 }
 
@@ -260,25 +252,23 @@ function UnquoteAttributeValue(c) {
   }
 }
 
-// 自封闭标签开始状态
 function selfClosingStartTag(c) {
   if (c == '>') {
     currentToken.isSelfClosing = true
     emit(currentToken)
     return data
   } else if (c == 'EOF') {
-    // error
+
   } else {
-    // error
+
   }
 }
 
 module.exports.parseHTML = function parseHTML(html) {
-  //console.log(html)
+
   let state = data;
   for (let c of html) {
     state = state(c)
   }
-  state = state(EOF) // 把EOF作为状态机的最后一个输入，强迫一些节点最后完成截止的标志
-  //console.log(stack[0])
+  state = state(EOF) 
 }
